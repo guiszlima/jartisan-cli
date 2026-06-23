@@ -1,0 +1,19 @@
+# Build outputs
+bin/
+obj/
+
+# Rider
+.idea/
+*.iml
+
+# VS Code
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Output gerado pela aplicação 
+jartisan.json
+
+# Resquícios de outras ferramentas (mantidos por precaução, geralmente não fazem diferença aqui)
+/packages/
+/_ReSharper.Caches/

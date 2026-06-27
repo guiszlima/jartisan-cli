@@ -1,6 +1,6 @@
 namespace Jartisan.Domain.Entities;
 
-public record class FolderMap(
+public record  FolderMap(
     
         string RootPath,
         string? Controllers, 

@@ -22,6 +22,7 @@
     <ProjectReference Include="..\Jartisan.Domain\Jartisan.Domain.csproj" />
     <ProjectReference Include="..\Jartisan.Application\Jartisan.Application.csproj" />
     <ProjectReference Include="..\Jartisan.Infrastructure\Jartisan.Infrastructure.csproj" />
+    <ProjectReference Include="..\Jartisan.CLI\Jartisan.CLI.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,8 +7,7 @@ public class FolderScanner : IFolderScanner
 {
     private readonly string _rootPath = Directory.GetCurrentDirectory();
 
-    // Cada chave é o nome canônico usado no FolderMap.
-    // Cada valor é a lista de variações aceitas (singular/plural, etc).
+    
     private static readonly Dictionary<string, string[]> _folderAliases = new()
     {
         ["Controllers"]  = ["Controllers", "Controller"],
@@ -20,6 +19,8 @@ public class FolderScanner : IFolderScanner
 
     public FolderMap Scan()
     {
+     string pomPath = Path.Combine(_rootPath, "pom.xml");
+    bool isMavenProject = File.Exists(pomPath);
         var folderPaths = GetFolderPaths(_rootPath, _folderAliases);
 
         return new FolderMap(
@@ -44,7 +45,9 @@ public class FolderScanner : IFolderScanner
             entry =>
             {
                 var foundPath = existingDirs.FirstOrDefault(dir =>
+                    
                     entry.Value.Any(alias =>
+                        
                         Path.GetFileName(dir).Equals(alias, StringComparison.OrdinalIgnoreCase)));
 
                 return foundPath != null ? Path.Combine(foundPath, string.Empty) : null;

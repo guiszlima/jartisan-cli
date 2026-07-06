@@ -7,12 +7,14 @@ namespace Jartisan.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            // Registre os serviços de infraestrutura aqui
+
             services.AddTransient<IProjectDetector, JavaProjectDetector>();
             services.AddTransient<IProjectFactory, JavaProjectFactory>();
             services.AddTransient<IJsonManager, JsonManager>();
             services.AddTransient<IFolderScanner, FolderScanner>();
 
+            services.AddTransient<ITemplateProcessor, TemplateProcessor>();
+            services.AddTransient<IFileWriter, FileWriter>();
             
             return services;
         }

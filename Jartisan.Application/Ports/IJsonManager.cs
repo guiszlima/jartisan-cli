@@ -4,6 +4,7 @@ namespace Jartisan.Application.Ports
 {
     public interface IJsonManager
     {
-        void SaveTemplate(FolderMap folderMap); 
+        void SaveJsonConfig(FolderMap folderMap); 
+        FolderMap LoadConfig();
     }
 }

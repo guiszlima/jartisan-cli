@@ -23,6 +23,7 @@ class Program
         });
         
         app.Add<InitCommand>();
+        app.Add<MakeCommand>();
 
         
         await app.RunAsync(args);

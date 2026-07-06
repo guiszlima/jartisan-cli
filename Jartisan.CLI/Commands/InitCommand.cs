@@ -18,37 +18,43 @@ namespace Jartisan.CLI.Commands
 
         [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(InitCommand))]
         [Command("init")]
-        public void Execute()
+      public void Execute()
+{
+    try
+    {
+        // 1. Cenário: O projeto já existe
+        if (detectUseCase.Execute())
         {
-            try
+            Console.WriteLine("O projeto atual já é um projeto Maven. Deseja atualizar o arquivo jartisan.json? (s/n)");
+            if (Console.ReadLine()?.Trim().ToLower() == "s")
             {
-                // Objeto de configuração inicializado com os padrões do seu Record
-                var config = new JavaProjectConfig();
-
-                if (!detectUseCase.Execute())
-                {
-                    Console.Error.WriteLine("O projeto atual não é um projeto Maven. Gostaria de criar um projeto Maven? (s/n)");
-                    
-                    if (Console.ReadLine()?.Trim().ToLower() != "s")
-                    {
-                        Console.WriteLine("Operação cancelada pelo usuário.");
-                        return; 
-                    }
-
-                    // Captura as configurações customizadas interativamente via terminal
-                    config = GetUserConfig();
-
-                    Console.WriteLine("Criando projeto Maven...");
-                    createProjectUseCase.Execute(config); // Passa o objeto preenchido ou com os padrões
-                }
-
                 jsonUseCase.Execute();
+                Console.WriteLine("Arquivo jartisan.json atualizado com sucesso.");
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Erro ao inicializar: {ex.Message}");
-            }
+            return; // 🛑 Encerra a execução do comando aqui!
         }
+
+        // 2. Cenário: O projeto não existe 
+        Console.Error.WriteLine("O projeto atual não é um projeto Maven. Gostaria de criar um projeto Maven? (s/n)");
+        
+        if (Console.ReadLine()?.Trim().ToLower() != "s")
+        {
+            Console.WriteLine("Operação cancelada pelo usuário.");
+            return; // 🛑 Encerra a execução
+        }
+
+       
+        var config = GetUserConfig();
+
+        Console.WriteLine("Criando projeto Maven...");
+        createProjectUseCase.Execute(config); 
+        jsonUseCase.Execute();
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Erro ao inicializar: {ex.Message}");
+    }
+}
 
         /// <summary>
         /// Pergunta os dados ao usuário pelo terminal. Se forem vazios, mantém o padrão do record.

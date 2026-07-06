@@ -5,5 +5,6 @@ namespace Jartisan.Application.Ports
     {
       
         bool ProjectExists();
+        string GetGroupId();
     }
 }

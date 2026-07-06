@@ -21,8 +21,8 @@ namespace Jartisan.Application.UseCases.Init;
        
 
            FolderMap folderMap = _folderScanner.Scan();
-
-              _jsonManager.SaveTemplate(folderMap);
+          
+              _jsonManager.SaveJsonConfig(folderMap);
     
                 return folderMap;
 

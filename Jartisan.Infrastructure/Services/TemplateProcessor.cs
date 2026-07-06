@@ -56,15 +56,18 @@ namespace Jartisan.Infrastructure.Services
                 ? Path.GetFileName(templateName) 
                 : $"{templateName}.tpl";
 
+            
+            string customDiskPath = Path.Combine(Environment.CurrentDirectory, "templates.jartisan", fileName);
+            if (File.Exists(customDiskPath)) return File.ReadAllText(customDiskPath);
+
+            
             string embeddedPath = $"templates/{fileName}";
             string embeddedContent = LoadEmbeddedTemplate(embeddedPath);
             if (embeddedContent != null) return embeddedContent;
 
-            string customDiskPath = Path.Combine(Environment.CurrentDirectory, "templates.jartisan", fileName);
-            if (File.Exists(customDiskPath)) return File.ReadAllText(customDiskPath);
-
             throw new FileNotFoundException($"Template não encontrado: {fileName}");
         }
+
 
         private string LoadEmbeddedTemplate(string templatePath)
         {

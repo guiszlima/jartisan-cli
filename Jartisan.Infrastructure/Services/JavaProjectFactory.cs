@@ -18,14 +18,14 @@ namespace Jartisan.Infrastructure.Services;
         public void CreateProject(JavaProjectConfig? config = null)
         {
 
-        config ??= new JavaProjectConfig();
-    Console.WriteLine($"Criando projeto Maven com GroupId: {config.GroupId}, ArtifactId: {config.ArtifactId ?? _dirInfo.Name}, Version: {config.Version}, {_rootPath}");
-    // Se o usuário não digitou nada, assume a pasta, senão, mantém o que o usuário digitou
-    config.ArtifactId ??= this._dirInfo.Name; 
+            config ??= new JavaProjectConfig();
+            Console.WriteLine($"Criando projeto Maven com GroupId: {config.GroupId}, ArtifactId: {config.ArtifactId ?? _dirInfo.Name}, Version: {config.Version}, {_rootPath}");
+            // Se o usuário não digitou nada, assume a pasta, senão, mantém o que o usuário digitou
+            config.ArtifactId ??= this._dirInfo.Name; 
 
-    // MUDANÇA: Use config.ArtifactId aqui, e não this._dirInfo.Name
-    CreateJavaDirectoryStructure(config.GroupId);
-    CreatePomXmlFile(config.GroupId, config.ArtifactId, config.Version);
+            // MUDANÇA: Use config.ArtifactId aqui, e não this._dirInfo.Name
+            CreateJavaDirectoryStructure(config.GroupId);
+            CreatePomXmlFile(config.GroupId, config.ArtifactId, config.Version);
         }
 
 

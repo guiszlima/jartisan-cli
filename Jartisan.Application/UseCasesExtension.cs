@@ -10,8 +10,11 @@ namespace Jartisan.Application
             services.AddTransient<UseCases.Init.InitDetectUseCase>();
             services.AddTransient<UseCases.Init.InitProjectUseCase>();
             services.AddTransient<UseCases.Init.InitJsonUseCase>();
+            services.AddTransient<UseCases.Init.InitTemplatesUseCase>();
             //Dependencias do comando Make
             services.AddTransient<UseCases.Make.MakeUseCase>();
+            //Dependencias do comando Scan
+            services.AddTransient<UseCases.Scan.ScanUseCase>();
             return services;
         }
     }

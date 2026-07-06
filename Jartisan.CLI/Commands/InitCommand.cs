@@ -1,60 +1,65 @@
+using System;
+using System.Diagnostics.CodeAnalysis; 
 using ConsoleAppFramework;
 using Jartisan.Application.UseCases.Init;
 using Jartisan.Domain.Entities;
 
-using System.Diagnostics.CodeAnalysis; 
-
 namespace Jartisan.CLI.Commands
-
 {
-
-    
-    public class InitCommand
-    (
+    public class InitCommand(
         InitDetectUseCase detectUseCase, 
         InitProjectUseCase createProjectUseCase, 
-        InitJsonUseCase jsonUseCase)             
+        InitJsonUseCase jsonUseCase,
+        InitTemplatesUseCase templatesUseCase) // ADICIONADO: Injeção do novo Use Case focado em SRP            
     {
-
         [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(InitCommand))]
         [Command("init")]
-      public void Execute()
-{
-    try
-    {
-        // 1. Cenário: O projeto já existe
-        if (detectUseCase.Execute())
+        public void Execute()
         {
-            Console.WriteLine("O projeto atual já é um projeto Maven. Deseja atualizar o arquivo jartisan.json? (s/n)");
-            if (Console.ReadLine()?.Trim().ToLower() == "s")
+            try
             {
-                jsonUseCase.Execute();
-                Console.WriteLine("Arquivo jartisan.json atualizado com sucesso.");
+                // 1. Cenário: O projeto já existe
+                if (detectUseCase.Execute())
+                {
+                    Console.WriteLine("O projeto atual já é um projeto Maven. Deseja atualizar o arquivo jartisan.json? (s/n)");
+                    if (Console.ReadLine()?.Trim().ToLower() == "s")
+                    {
+                        // Passo A: Atualiza as configurações e captura o FolderMap do scanner
+                        FolderMap map = jsonUseCase.Execute();
+                        
+                        // Passo B: Garante a criação da pasta apenas se ela não existir no HD
+                        templatesUseCase.Execute(map.TemplatesFolder);
+                        
+                        Console.WriteLine("Arquivo jartisan.json atualizado com sucesso.");
+                    }
+                    return; // 🛑 Encerra a execução do comando aqui!
+                }
+
+                // 2. Cenário: O projeto não existe (Criação do zero)
+                Console.Error.WriteLine("O projeto atual não é um projeto Maven. Gostaria de criar um projeto Maven? (s/n)");
+                
+                if (Console.ReadLine()?.Trim().ToLower() != "s")
+                {
+                    Console.WriteLine("Operação cancelada pelo usuário.");
+                    return; // 🛑 Encerra a execução
+                }
+
+                var config = GetUserConfig();
+
+                Console.WriteLine("Criando projeto Maven...");
+                createProjectUseCase.Execute(config); 
+                
+                // Passo A: Gera e salva o arquivo jartisan.json inicial
+                FolderMap novoMap = jsonUseCase.Execute();
+                
+                // Passo B: Cria a pasta de customização templates.jartisan com o README
+                templatesUseCase.Execute(novoMap.TemplatesFolder);
             }
-            return; // 🛑 Encerra a execução do comando aqui!
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Erro ao inicializar: {ex.Message}");
+            }
         }
-
-        // 2. Cenário: O projeto não existe 
-        Console.Error.WriteLine("O projeto atual não é um projeto Maven. Gostaria de criar um projeto Maven? (s/n)");
-        
-        if (Console.ReadLine()?.Trim().ToLower() != "s")
-        {
-            Console.WriteLine("Operação cancelada pelo usuário.");
-            return; // 🛑 Encerra a execução
-        }
-
-       
-        var config = GetUserConfig();
-
-        Console.WriteLine("Criando projeto Maven...");
-        createProjectUseCase.Execute(config); 
-        jsonUseCase.Execute();
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"Erro ao inicializar: {ex.Message}");
-    }
-}
 
         /// <summary>
         /// Pergunta os dados ao usuário pelo terminal. Se forem vazios, mantém o padrão do record.
@@ -74,7 +79,6 @@ namespace Jartisan.CLI.Commands
 
             return new JavaProjectConfig
             {
-                // Se o usuário apertou Enter (vazio), usa o valor padrão do Record
                 GroupId = string.IsNullOrWhiteSpace(inputGroupId) ? configPadrao.GroupId : inputGroupId,
                 ArtifactId = string.IsNullOrWhiteSpace(inputArtifactId) ? null : inputArtifactId, 
                 Version = string.IsNullOrWhiteSpace(inputVersion) ? configPadrao.Version : inputVersion

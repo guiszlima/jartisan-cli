@@ -20,6 +20,11 @@
             Pergunta os dados ao usuário pelo terminal. Se forem vazios, mantém o padrão do record.
             </summary>
         </member>
+        <member name="M:Jartisan.CLI.Commands.ListCommand.Execute">
+            <summary>
+            Lists all dependencies currently defined in the pom.xml file.
+            </summary>
+        </member>
         <member name="M:Jartisan.CLI.Commands.MakeCommand.Execute(System.String,System.String,System.Boolean,System.Boolean)">
             <summary>
             Generates code scaffolding for a specific artifact type.

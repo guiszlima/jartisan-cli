@@ -24,6 +24,7 @@ namespace Jartisan.Infrastructure
 
             services.AddTransient<IDependencyResolver, MavenApi>();
             services.AddTransient<IDependencyEditor, PomEditor>();
+            services.AddTransient<IDependencyReader, PomReader>();
             
             return services;
         }

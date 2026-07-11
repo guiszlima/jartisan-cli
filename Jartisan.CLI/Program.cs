@@ -26,6 +26,7 @@ class Program
         app.Add<MakeCommand>();
         app.Add<ScanCommand>();
         app.Add<AddCommand>();
+        app.Add<ListCommand>();
 
         
         await app.RunAsync(args);

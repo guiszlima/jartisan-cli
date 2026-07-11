@@ -33,7 +33,7 @@ public class JavaProjectDetector : IProjectDetector
 
         XDocument doc = XDocument.Load(_pomPath);
         if (doc.Root == null)
-            throw new InvalidOperationException("O arquivo pom.xml está vazio ou corrompido.");
+            throw new InvalidOperationException("The pom.xml file is empty or corrupted.");
 
         var groupId = doc.Root.Elements()
             .FirstOrDefault(e => e.Name.LocalName.Equals("groupId", StringComparison.OrdinalIgnoreCase))?.Value;
@@ -47,7 +47,7 @@ public class JavaProjectDetector : IProjectDetector
                 .FirstOrDefault(e => e.Name.LocalName.Equals("groupId", StringComparison.OrdinalIgnoreCase))?.Value;
         }
 
-        return groupId ?? throw new InvalidOperationException("GroupId não encontrado no pom.xml");
+        return groupId ?? throw new InvalidOperationException("GroupId not found in pom.xml");
     }
 
     public string GetArtifactId()
@@ -61,6 +61,6 @@ public class JavaProjectDetector : IProjectDetector
 
         XNamespace nmspace = "http://maven.apache.org/POM/4.0.0";
         var artifactId = doc.Root?.Element(nmspace + "artifactId")?.Value;
-        return artifactId ?? throw new InvalidOperationException("ArtifactId não encontrado no pom.xml");
+        return artifactId ?? throw new InvalidOperationException("ArtifactId not found in pom.xml");
     }
 }

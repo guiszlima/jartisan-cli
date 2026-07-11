@@ -18,34 +18,37 @@ namespace Jartisan.CLI.Commands
         {
             _addUseCase = addUseCase ?? throw new ArgumentNullException(nameof(addUseCase));
         }
-
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(AddCommand))]
-        [Command("add")]
-        [Description("Busca dependências no Maven Central e permite escolher qual adicionar ao pom.xml")]
+ 
+      /// <summary>
+        /// Adds a dependency to the project's pom.xml file.
+        /// </summary>
+        /// <param name="query">The search query for finding the dependency.</param>
+        [Command("add")] 
+       
         public async Task HandleAsync([Argument] string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
-                DisplayError("A query de busca não pode ser vazia.");
+                DisplayError("The search query cannot be empty.");
                 return;
             }
 
-            // 1. Busca os dados (Assíncrono com CancellationToken)
+            // 1. Fetch the results (asynchronously with CancellationToken)
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            Console.Write("Processando busca no Maven Central... ");
+            Console.Write("Processing search on Maven Central... ");
             
             var searchTask = _addUseCase.SearchAsync(query, cts.Token);
             var results = await ShowLoadingAnimationAsync(searchTask);
 
-            // 2. Validação dos resultados
+            // 2. Validate the results
             if (results == null || results.Count == 0)
             {
-                DisplayError("Nenhuma dependência encontrada para essa query.");
+                DisplayError("No dependencies were found for that query.");
                 return;
             }
 
-            // 3. Exibição da lista interativa
-            Console.WriteLine($"\nEncontrei {results.Count} resultados:\n");
+            // 3. Display the interactive list
+            Console.WriteLine($"\nFound {results.Count} results:\n");
             for (int i = 0; i < results.Count; i++)
             {
                 var dep = results[i];
@@ -56,14 +59,14 @@ namespace Jartisan.CLI.Commands
             int selectedIndex = -1;
             while (true)
             {
-                Console.Write("\nEscolha o número da dependência (ou 0 para cancelar): ");
+                Console.Write("\nChoose the dependency number (or 0 to cancel): ");
                 var input = Console.ReadLine();
 
                 if (int.TryParse(input, out int choice))
                 {
                     if (choice == 0) 
                     {
-                        Console.WriteLine("Operação cancelada pelo usuário.");
+                        Console.WriteLine("Operation cancelled by the user.");
                         return;
                     }
                     if (choice > 0 && choice <= results.Count)
@@ -72,7 +75,7 @@ namespace Jartisan.CLI.Commands
                         break;
                     }
                 }
-                Console.WriteLine("Opção inválida, tente novamente.");
+                Console.WriteLine("Invalid option, please try again.");
             }
 
             // 5. Execução da adição
@@ -84,14 +87,14 @@ namespace Jartisan.CLI.Commands
     Console.ForegroundColor = isAdded ? ConsoleColor.Green : ConsoleColor.Yellow;
     
     Console.WriteLine(isAdded 
-        ? $"\n[Sucesso] Adicionado: {selected.GroupId}:{selected.ArtifactId} (v{selected.Version}) ✨" 
-        : $"\n[Aviso] A dependência {selected.GroupId}:{selected.ArtifactId} já existe no pom.xml.");
+        ? $"\n[Success] Added: {selected.GroupId}:{selected.ArtifactId} (v{selected.Version}) ✨" 
+        : $"\n[Warning] The dependency {selected.GroupId}:{selected.ArtifactId} already exists in pom.xml.");
         
     Console.ResetColor();
             }
             catch (Exception ex)
             {
-                DisplayError($"Erro ao atualizar pom.xml: {ex.Message}");
+                DisplayError($"Error updating pom.xml: {ex.Message}");
             }
         }
 
@@ -120,10 +123,10 @@ namespace Jartisan.CLI.Commands
             return await task;
         }
 
-        private static void DisplayError(string mensagem)
+        private static void DisplayError(string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"\n[Erro] {mensagem}");
+            Console.WriteLine($"\n[Error] {message}");
             Console.ResetColor();
         }
     }

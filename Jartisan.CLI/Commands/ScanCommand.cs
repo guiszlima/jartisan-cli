@@ -8,27 +8,30 @@ namespace Jartisan.CLI.Commands
 {
     public class ScanCommand(ScanUseCase scanUseCase)
     {
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ScanCommand))]
+
+         /// <summary>
+        /// Scans the project directory structure and synchronizes it with the jartisan.json configuration.
+        /// </summary>
         [Command("scan")]
         
         public void Execute()
         {
             try
             {
-                Console.WriteLine("Sincronizando estrutura de pastas com o disco físico...");
+                Console.WriteLine("Synchronizing folder structure with the physical disk...");
 
                 
                 FolderMap updatedMap = scanUseCase.Execute();
 
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\n[Sucesso] Projeto re-escaneado e jartisan.json sincronizado com sucesso!");
+                Console.WriteLine("\n[Success] Project re-scanned and jartisan.json synchronized successfully!");
                 Console.ResetColor();
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n[Erro] Falha ao executar o scan: {ex.Message}");
+                Console.WriteLine($"\n[Error] Failed to execute the scan: {ex.Message}");
                 Console.ResetColor();
             }
         }

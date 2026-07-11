@@ -27,16 +27,16 @@ namespace Jartisan.Application.UseCases.Make
         {
             // 1. Fail-Fast básico de entrada
             if (string.IsNullOrWhiteSpace(inputName))
-                throw new ArgumentException("O nome do componente não pode ser vazio.", nameof(inputName));
+                throw new ArgumentException("The component name cannot be empty.", nameof(inputName));
             if (string.IsNullOrWhiteSpace(scaffoldingType))
-                throw new ArgumentException("O tipo de scaffolding não pode ser vazio.", nameof(scaffoldingType));
+                throw new ArgumentException("The scaffolding type cannot be empty.", nameof(scaffoldingType));
 
             // 2. Carrega as configurações do cache JSON
             FolderMap jsonData = _jsonManager.LoadConfig();
             
             // Protege contra tipos de scaffolding inexistentes ou erros de digitação no jartisan.json
             string targetPath = jsonData[scaffoldingType]
-                ?? throw new InvalidOperationException($"[Erro] O tipo de scaffolding '{scaffoldingType}' não está mapeado no seu arquivo jartisan.json.");
+                ?? throw new InvalidOperationException($"[Error] The scaffolding type '{scaffoldingType}' is not mapped in your jartisan.json file.");
 
             // 3. Coleta os dados básicos do Java
             string package = _processor.ProcessPackage(targetPath);
@@ -52,8 +52,8 @@ namespace Jartisan.Application.UseCases.Make
             if (File.Exists(fullPath) && !opts.IsForce)
             {
                 throw new InvalidOperationException(
-                    $"O arquivo '{fileName}' já existe neste diretório. " +
-                    "Se deseja sobrescrever o arquivo atual, execute o comando novamente adicionando a flag '--force'.");
+                    $"The file '{fileName}' already exists in this directory. " +
+                    "If you want to overwrite the current file, run the command again with the '--force' flag.");
             }
      
 
@@ -73,7 +73,7 @@ namespace Jartisan.Application.UseCases.Make
             if (wasFolderCreated)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"[Aviso] A pasta do scaffolding não existia fisicamente. Diretório criado automaticamente.");
+                Console.WriteLine($"[Warning] The scaffolding folder did not exist physically. Directory created automatically.");
                 Console.ResetColor();
             }
         }

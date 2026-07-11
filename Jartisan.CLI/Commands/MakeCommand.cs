@@ -7,9 +7,15 @@ using Jartisan.Domain.Entities;
 namespace Jartisan.CLI.Commands
 {
     public class MakeCommand(MakeUseCase makeUseCase)
-    {
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(MakeCommand))]
-        [Command("make")] // CORREÇÃO: Passa apenas o nome do comando aqui
+    { 
+        /// <summary>
+        /// Generates code scaffolding for a specific artifact type.
+        /// </summary>
+        /// <param name="scaffoldingType">The type of artifact to generate (e.g., controller, service, repository).</param>
+        /// <param name="inputName">The name of the class or component to be created.</param>
+        /// <param name="crud">-c, --crud, Automatically generates full CRUD operations for the artifact.</param>
+        /// <param name="force">-f, --force, Overwrites existing files if they already exist.</param>
+        [Command("make")] 
         
         public void Execute(
             [Argument] string scaffoldingType, // Parâmetro posicional obrigatório
@@ -26,13 +32,13 @@ namespace Jartisan.CLI.Commands
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 string artifactName = char.ToUpper(scaffoldingType[0]) + scaffoldingType.Substring(1).ToLower();
-                Console.WriteLine($"\n[Sucesso] {artifactName} gerado com sucesso para '{inputName}'.");
+                Console.WriteLine($"\n[Success] {artifactName} generated successfully for '{inputName}'.");
                 Console.ResetColor();
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n[Erro] {ex.Message}");
+                Console.WriteLine($"\n[Error] {ex.Message}");
                 Console.ResetColor();
             }
         }

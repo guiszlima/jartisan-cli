@@ -26,17 +26,17 @@ namespace Jartisan.Application.UseCases.Init
 
             string readmeContent = 
                 "======================================================================\n" +
-                " JARTISAN CLI - TEMPLATES CUSTOMIZADOS\n" +
+                " JARTISAN CLI - CUSTOM TEMPLATES\n" +
                 "======================================================================\n\n" +
-                "Coloque seus arquivos de template (.tpl) nesta pasta para estender\n" +
-                "ou sobrescrever as gerações nativas do comando 'jartisan make'.\n\n" +
-                "Arquivos criados aqui têm prioridade máxima de leitura sobre o binário.\n\n" +
-                "Variáveis universais disponíveis para substituição automática:\n" +
-                "  {{package}}      -> O pacote correto do Java (ex: com.jartisan.controller)\n" +
-                "  {{ClassName}}    -> O nome da classe informado no terminal (ex: Usuario)\n" +
-                "  {{endpointName}} -> O nome em kebab-case automatizado para rotas (ex: ordem-servico)\n\n" +
-                "Exemplo de uso para criar um template novo 'handler.tpl':\n" +
-                "  jartisan make handler CriarUsuario\n";
+                "Place your template files (.tpl) in this folder to extend\n" +
+                "or override the native generations of the 'jartisan make' command.\n\n" +
+                "Files created here have the highest read priority over the binary.\n\n" +
+                "Universal variables available for automatic replacement:\n" +
+                "  {{package}}      -> The correct Java package (e.g. com.jartisan.controller)\n" +
+                "  {{ClassName}}    -> The class name provided in the terminal (e.g. User)\n" +
+                "  {{endpointName}} -> The automated kebab-case name for routes (e.g. order-service)\n\n" +
+                "Example of creating a new template 'handler.tpl':\n" +
+                "  jartisan make handler CreateUser\n";
 
             // O seu FileWriter assume o controle técnico e faz a pasta nascer de fábrica com o manual
             _writer.Write(readmeFile, readmeContent);

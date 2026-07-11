@@ -56,7 +56,7 @@ public class TemplateProcessor : ITemplateProcessor
         string embeddedContent = LoadEmbeddedTemplate(embeddedPath);
         if (embeddedContent != null) return embeddedContent;
 
-        throw new FileNotFoundException($"Template não encontrado: {fileName}");
+        throw new FileNotFoundException($"Template not found: {fileName}");
     }
 
     private string LoadEmbeddedTemplate(string templatePath)
@@ -76,7 +76,7 @@ public class TemplateProcessor : ITemplateProcessor
     {
         if (string.IsNullOrWhiteSpace(targetPath))
         {
-            throw new ArgumentException("O caminho de destino não pode ser nulo ou vazio.", nameof(targetPath));
+            throw new ArgumentException("The destination path cannot be null or empty.", nameof(targetPath));
         }
 
         string normalizedPath = Path.GetFullPath(targetPath);
@@ -85,7 +85,7 @@ public class TemplateProcessor : ITemplateProcessor
         int index = normalizedPath.IndexOf(sourceRoot, StringComparison.OrdinalIgnoreCase);
         if (index == -1)
         {
-            throw new InvalidOperationException($"O diretório alvo deve estar dentro de 'src/main/java'. Caminho recebido: {targetPath}");
+            throw new InvalidOperationException($"The target directory must be inside 'src/main/java'. Received path: {targetPath}");
         }
 
         string packagePart = normalizedPath.Substring(index + sourceRoot.Length);

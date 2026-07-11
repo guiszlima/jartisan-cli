@@ -25,12 +25,12 @@ public class JsonManager : IJsonManager
         string filePath = Path.Combine(_rootPath, "jartisan.json");
         
         if (!File.Exists(filePath))
-            throw new FileNotFoundException($"O arquivo de configuração não foi encontrado em {filePath}");
+            throw new FileNotFoundException($"The configuration file was not found at {filePath}");
 
         string jsonString = File.ReadAllText(filePath);
         
         var config = JsonSerializer.Deserialize<FolderMap>(jsonString, JartisanJsonContext.Default.FolderMap);
         
-        return config ?? throw new InvalidOperationException("Falha ao desserializar o arquivo jartisan.json");
+        return config ?? throw new InvalidOperationException("Failed to deserialize the jartisan.json file");
     }
 }

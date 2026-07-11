@@ -10,9 +10,13 @@ namespace Jartisan.CLI.Commands
         InitDetectUseCase detectUseCase, 
         InitProjectUseCase createProjectUseCase, 
         InitJsonUseCase jsonUseCase,
-        InitTemplatesUseCase templatesUseCase) // ADICIONADO: Injeção do novo Use Case focado em SRP            
+        InitTemplatesUseCase templatesUseCase) 
     {
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(InitCommand))]
+        
+        
+        /// <summary>
+        /// Initializes a new Maven project interactively or updates existing configurations.
+        /// </summary>
         [Command("init")]
         public void Execute()
         {
@@ -21,8 +25,8 @@ namespace Jartisan.CLI.Commands
                 // 1. Cenário: O projeto já existe
                 if (detectUseCase.Execute())
                 {
-                    Console.WriteLine("O projeto atual já é um projeto Maven. Deseja atualizar o arquivo jartisan.json? (s/n)");
-                    if (Console.ReadLine()?.Trim().ToLower() == "s")
+                    Console.WriteLine("The current project is already a Maven project. Do you want to update the jartisan.json file? (y/n)");
+                    if (Console.ReadLine()?.Trim().ToLower() == "y")
                     {
                         // Passo A: Atualiza as configurações e captura o FolderMap do scanner
                         FolderMap map = jsonUseCase.Execute();
@@ -30,23 +34,23 @@ namespace Jartisan.CLI.Commands
                         // Passo B: Garante a criação da pasta apenas se ela não existir no HD
                         templatesUseCase.Execute(map.TemplatesFolder);
                         
-                        Console.WriteLine("Arquivo jartisan.json atualizado com sucesso.");
+                        Console.WriteLine("jartisan.json updated successfully.");
                     }
                     return; // 🛑 Encerra a execução do comando aqui!
                 }
 
                 // 2. Cenário: O projeto não existe (Criação do zero)
-                Console.Error.WriteLine("O projeto atual não é um projeto Maven. Gostaria de criar um projeto Maven? (s/n)");
+                Console.Error.WriteLine("The current project is not a Maven project. Would you like to create a Maven project? (y/n)");
                 
-                if (Console.ReadLine()?.Trim().ToLower() != "s")
+                if (Console.ReadLine()?.Trim().ToLower() != "y")
                 {
-                    Console.WriteLine("Operação cancelada pelo usuário.");
+                    Console.WriteLine("Operation cancelled by the user.");
                     return; // 🛑 Encerra a execução
                 }
 
                 var config = GetUserConfig();
 
-                Console.WriteLine("Criando projeto Maven...");
+                Console.WriteLine("Creating Maven project...");
                 createProjectUseCase.Execute(config); 
                 
                 // Passo A: Gera e salva o arquivo jartisan.json inicial
@@ -57,7 +61,7 @@ namespace Jartisan.CLI.Commands
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Erro ao inicializar: {ex.Message}");
+                Console.Error.WriteLine($"Error initializing: {ex.Message}");
             }
         }
 
@@ -68,13 +72,13 @@ namespace Jartisan.CLI.Commands
         {
             var configPadrao = new JavaProjectConfig();
             
-            Console.Write($"Informe o GroupId [{configPadrao.GroupId}]: ");
+            Console.Write($"Enter the GroupId [{configPadrao.GroupId}]: ");
             string? inputGroupId = Console.ReadLine()?.Trim();
             
-            Console.Write("Informe o ArtifactId [Nome da pasta atual]: ");
+            Console.Write("Enter the ArtifactId [Current folder name]: ");
             string? inputArtifactId = Console.ReadLine()?.Trim();
             
-            Console.Write($"Informe a Versão [{configPadrao.Version}]: ");
+            Console.Write($"Enter the Version [{configPadrao.Version}]: ");
             string? inputVersion = Console.ReadLine()?.Trim();
 
             return new JavaProjectConfig

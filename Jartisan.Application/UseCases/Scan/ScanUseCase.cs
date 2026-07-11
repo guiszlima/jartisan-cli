@@ -22,7 +22,7 @@ namespace Jartisan.Application.UseCases.Scan
             
             if (!_detector.ProjectExists())
             {
-                throw new InvalidOperationException("Não foi detectado um projeto Maven válido na pasta atual para escanear.");
+                throw new InvalidOperationException("No valid Maven project was detected in the current folder to scan.");
             }
 
 

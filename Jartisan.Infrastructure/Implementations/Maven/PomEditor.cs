@@ -21,13 +21,13 @@ namespace Jartisan.Infrastructure.Implementations.Maven
             if (dependency == null) throw new ArgumentNullException(nameof(dependency));
 
             if (!File.Exists(_pomPath))
-                throw new FileNotFoundException("pom.xml não encontrado no diretório atual.");
+                throw new FileNotFoundException("pom.xml was not found in the current directory.");
 
             // Mantém comentários e espaços em branco originais
             var doc = XDocument.Load(_pomPath, LoadOptions.PreserveWhitespace);
             
             var root = doc.Elements().FirstOrDefault(e => e.Name.LocalName == "project");
-            if (root == null) throw new Exception("Tag <project> não encontrada no pom.xml.");
+            if (root == null) throw new Exception("The <project> tag was not found in pom.xml.");
             
             XNamespace activeNs = root.Name.Namespace;
 

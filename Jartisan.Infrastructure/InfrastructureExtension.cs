@@ -1,6 +1,12 @@
-using Jartisan.Infrastructure.Services;
 using Jartisan.Application.Ports;
+using Jartisan.Infrastructure.Implementations.Configuration;
+using Jartisan.Infrastructure.Implementations.Files;
+using Jartisan.Infrastructure.Implementations.Projects;
+using Jartisan.Infrastructure.Implementations.Scanning;
+using Jartisan.Infrastructure.Implementations.Templates;
+using Jartisan.Infrastructure.Implementations.Maven;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace Jartisan.Infrastructure
 {
     public static class InfrastructureExtension
@@ -15,6 +21,9 @@ namespace Jartisan.Infrastructure
 
             services.AddTransient<ITemplateProcessor, TemplateProcessor>();
             services.AddTransient<IFileWriter, FileWriter>();
+
+            services.AddTransient<IDependencyResolver, MavenApi>();
+            services.AddTransient<IDependencyEditor, PomEditor>();
             
             return services;
         }

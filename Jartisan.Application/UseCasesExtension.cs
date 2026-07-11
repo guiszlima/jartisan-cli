@@ -15,6 +15,8 @@ namespace Jartisan.Application
             services.AddTransient<UseCases.Make.MakeUseCase>();
             //Dependencias do comando Scan
             services.AddTransient<UseCases.Scan.ScanUseCase>();
+           //Dependencias do comando Add
+            services.AddTransient<UseCases.Add.AddUseCase>();
             return services;
         }
     }

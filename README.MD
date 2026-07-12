@@ -37,7 +37,7 @@ jartisan init
 Adds a dependency to the Maven `pom.xml`.
 
 ```bash
-jartisan add spring-boot-starter-web --version 3.4.0
+jartisan add spring-boot-starter-web:3.4.0
 ```
 
 ### `list`

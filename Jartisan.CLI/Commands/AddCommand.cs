@@ -18,12 +18,23 @@ namespace Jartisan.CLI.Commands
         {
             _addUseCase = addUseCase ?? throw new ArgumentNullException(nameof(addUseCase));
         }
- 
-        /// <summary>
-        /// Adds a dependency to the project's pom.xml file.
-        /// </summary>
-        /// <param name="query">The search query for finding the dependency.</param>
-        [Command("add")] 
+      
+  /// <summary>
+/// Searches for and adds a Maven dependency to the project's pom.xml.
+/// </summary>
+/// <param name="query">
+/// The search term or Maven coordinates to resolve.
+/// 
+/// Behaviors:
+///   - Single match: If the search returns exactly one result, it is added automatically.
+///   - Multiple matches: If multiple results are found, an interactive list is displayed.
+/// 
+/// Supported query formats:
+///   - Search term : 'lombok'
+///   - Exact       : 'groupId:artifactId:version'
+///   - Partial     : 'groupId:artifactId' OR 'artifactId:version'
+/// </param>
+        [Command("add")]
         public async Task HandleAsync([Argument] string query)
         {
             if (string.IsNullOrWhiteSpace(query))

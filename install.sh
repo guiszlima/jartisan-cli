@@ -7,15 +7,31 @@ ARCH="x64"
 TARGET_DIR="$HOME/.local/bin"
 BINARY_PATH="$TARGET_DIR/jartisan"
 
-# Defina o repositório e a tag (ou 'latest')
 REPO="guiszlima/jartisan-cli"
-# Certifique-se de que a estrutura da URL corresponde ao nome do arquivo no seu release
 URL="https://github.com/$REPO/releases/latest/download/jartisan-${OS}-${ARCH}.tar.gz"
 
 echo "📥 Downloading Jartisan for $OS ($ARCH)..."
 mkdir -p "$TARGET_DIR"
 
-curl -sSL "$URL" | tar -xzf - -C "$TARGET_DIR"
+
+TMP_DIR=$(mktemp -d)
+
+
+curl -sSL "$URL" | tar -xzf - -C "$TMP_DIR"
+
+FOUND_BIN=$(find "$TMP_DIR" -type f -name "jartisan*" -print -quit)
+
+if [ -n "$FOUND_BIN" ]; then
+    mv "$FOUND_BIN" "$BINARY_PATH"
+else
+    echo "❌ Erro: Nenhum binário jartisan encontrado no pacote baixado."
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
+
+rm -rf "$TMP_DIR"
+
 
 chmod +x "$BINARY_PATH"
 

@@ -1,7 +1,10 @@
-# Build outputs
-bin/
-obj/
 
+# build outputs
+**/bin/
+**/obj/
+**/dist/
+obj/
+*.log
 # Rider
 .idea/
 *.iml

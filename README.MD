@@ -51,7 +51,7 @@ jartisan list
 Generates code scaffolding using predefined templates and project configuration. Supports flags such as `--crud` and `--force`.
 
 ```bash
-jartisan make UserService --crud
+jartisan make controller UserController --crud
 ```
 
 ### `scan`

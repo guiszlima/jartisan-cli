@@ -14,14 +14,14 @@ namespace Jartisan.Application.UseCases.Init
 
         public void Execute(string templatesFolder)
         {
-            // A REGRA INDESTRUTÍVEL: Se a pasta física já existir no disco rígido do usuário,
-            // nós encerramos a execução imediatamente. Respeita se o usuário deletou o README!
+            // THE INDESTRUCTIBLE RULE: If the physical folder already exists on the user's disk,
+            // we terminate execution immediately. Respects if the user deleted the README!
             if (Directory.Exists(templatesFolder))
             {
                 return;
             }
 
-            // O fluxo abaixo só roda se for a PRIMEIRA vez absoluta que o CLI cria a pasta no projeto
+            // The flow below only runs if it's the FIRST absolute time the CLI creates the folder in the project
             string readmeFile = Path.Combine(templatesFolder, "README.txt");
 
             string readmeContent = 
@@ -38,7 +38,7 @@ namespace Jartisan.Application.UseCases.Init
                 "Example of creating a new template 'handler.tpl':\n" +
                 "  jartisan make handler CreateUser\n";
 
-            // O seu FileWriter assume o controle técnico e faz a pasta nascer de fábrica com o manual
+            // Your FileWriter takes technical control and makes the folder come out of the factory with the manual
             _writer.Write(readmeFile, readmeContent);
         }
     }

@@ -12,7 +12,7 @@ public class FileWriter : IFileWriter
 
         if (!string.IsNullOrEmpty(directory))
         {
-            // Se a pasta não existe fisicamente, registra que ela será criada
+            // If the folder doesn't physically exist, records that it will be created
             if (!Directory.Exists(directory))
             {
                 folderCreated = true;
@@ -22,6 +22,6 @@ public class FileWriter : IFileWriter
         }
 
         File.WriteAllText(path, content);
-        return folderCreated; // Retorna a informação técnica pura para a aplicação
+        return folderCreated; // Returns pure technical information to the application
     }
 }

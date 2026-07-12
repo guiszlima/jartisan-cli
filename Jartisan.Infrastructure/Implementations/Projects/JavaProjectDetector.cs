@@ -1,50 +1,96 @@
-
-
 using Jartisan.Application.Ports;
+using System;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Xml.Linq;
 
 namespace Jartisan.Infrastructure.Implementations.Projects;
 
 public class JavaProjectDetector : IProjectDetector
 {
-    private readonly string _rootPath;
-    private readonly string _pomPath;
+    public string RootPath { get; private set; } = string.Empty;
+    public string PomPath { get; private set; } = string.Empty;
+    private bool _isValidProject;
 
     public JavaProjectDetector()
     {
-        _rootPath = Directory.GetCurrentDirectory();
-        _pomPath = Path.Combine(_rootPath, "pom.xml");
+        // Heavy I/O moved to a private method called in the constructor
+        // For better performance, consider extracting this to an .Initialize() method if the interface allows
+        InitializePaths();
+    }
+
+    private void InitializePaths()
+    {
+        var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+        // 1. Search for jartisan.json + pom.xml
+        while (currentDir != null)
+        {
+            var jsonCheck = Path.Combine(currentDir.FullName, "jartisan.json");
+            var pomCheck = Path.Combine(currentDir.FullName, "pom.xml");
+
+            if (File.Exists(jsonCheck) && File.Exists(pomCheck))
+            {
+                try
+                {
+                    string jsonString = File.ReadAllText(jsonCheck);
+                    using var doc = JsonDocument.Parse(jsonString);
+                    if (doc.RootElement.TryGetProperty("rootPath", out var rootProp))
+                    {
+                        RootPath = rootProp.GetString() ?? currentDir.FullName;
+                        PomPath = pomCheck;
+                        _isValidProject = true;
+                        return;
+                    }
+                }
+                catch
+                {
+                    // Ignores corrupted JSON, continues to the next level
+                }
+            }
+            currentDir = currentDir.Parent;
+        }
+
+        // 2. FALLBACK: Only pom.xml (init scenario)
+        currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (currentDir != null)
+        {
+            var pomCheck = Path.Combine(currentDir.FullName, "pom.xml");
+            if (File.Exists(pomCheck))
+            {
+                RootPath = currentDir.FullName;
+                PomPath = pomCheck;
+                _isValidProject = true;
+                return;
+            }
+            currentDir = currentDir.Parent;
+        }
+
+        // 3. Fora de um ecossistema Java
+        RootPath = Directory.GetCurrentDirectory();
+        PomPath = Path.Combine(RootPath, "pom.xml");
+        _isValidProject = false;
     }
 
     public bool ProjectExists()
     {
-        bool pomXmlExists = File.Exists(Path.Combine(_rootPath, "pom.xml"));
-        bool javaStructureExists = Directory.Exists(Path.Combine(_rootPath, "src", "main", "java"));
-
-        return pomXmlExists && javaStructureExists;
+        if (!_isValidProject) return false;
+        return File.Exists(PomPath) && Directory.Exists(Path.Combine(RootPath, "src", "main", "java"));
     }
 
     public string GetGroupId()
     {
-        if (!File.Exists(_pomPath))
-        {
-            throw new FileNotFoundException($"O arquivo pom.xml não foi encontrado em: {_pomPath}");
-        }
+        var doc = LoadPomDocument();
+        XNamespace ns = doc.Root?.GetDefaultNamespace() ?? XNamespace.None;
 
-        XDocument doc = XDocument.Load(_pomPath);
-        if (doc.Root == null)
-            throw new InvalidOperationException("The pom.xml file is empty or corrupted.");
+        // Busca o groupId direto do projeto
+        var groupId = doc.Root?.Element(ns + "groupId")?.Value;
 
-        var groupId = doc.Root.Elements()
-            .FirstOrDefault(e => e.Name.LocalName.Equals("groupId", StringComparison.OrdinalIgnoreCase))?.Value;
-
+        // If not found, search in <parent>
         if (string.IsNullOrEmpty(groupId))
         {
-            var parentElement = doc.Root.Elements()
-                .FirstOrDefault(e => e.Name.LocalName.Equals("parent", StringComparison.OrdinalIgnoreCase));
-
-            groupId = parentElement?.Elements()
-                .FirstOrDefault(e => e.Name.LocalName.Equals("groupId", StringComparison.OrdinalIgnoreCase))?.Value;
+            groupId = doc.Root?.Element(ns + "parent")?.Element(ns + "groupId")?.Value;
         }
 
         return groupId ?? throw new InvalidOperationException("GroupId not found in pom.xml");
@@ -52,15 +98,18 @@ public class JavaProjectDetector : IProjectDetector
 
     public string GetArtifactId()
     {
-        if (!File.Exists(_pomPath))
-        {
-            throw new FileNotFoundException($"O arquivo pom.xml não foi encontrado em: {_pomPath}");
-        }
+        var doc = LoadPomDocument();
+        XNamespace ns = doc.Root?.GetDefaultNamespace() ?? XNamespace.None;
 
-        XDocument doc = XDocument.Load(_pomPath);
-
-        XNamespace nmspace = "http://maven.apache.org/POM/4.0.0";
-        var artifactId = doc.Root?.Element(nmspace + "artifactId")?.Value;
+        var artifactId = doc.Root?.Element(ns + "artifactId")?.Value;
         return artifactId ?? throw new InvalidOperationException("ArtifactId not found in pom.xml");
+    }
+
+    private XDocument LoadPomDocument()
+    {
+        if (!ProjectExists()) 
+            throw new FileNotFoundException($"The pom.xml file was not found or the src/main/java structure is invalid. Path: {PomPath}");
+        
+        return XDocument.Load(PomPath);
     }
 }

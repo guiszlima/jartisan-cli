@@ -18,7 +18,7 @@ namespace Jartisan.Application.UseCases.Add
             _pomEditor = pomEditor ?? throw new ArgumentNullException(nameof(pomEditor));
         }
 
-        // Retorna o DependencyInfo se adicionou com sucesso, ou null se não encontrou/falhou
+        // Returns DependencyInfo if successfully added, or null if not found/failed
         public async Task<List<DependencyInfo>> SearchAsync(string query, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(query)) return null;

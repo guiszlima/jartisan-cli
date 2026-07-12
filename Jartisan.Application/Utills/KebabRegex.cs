@@ -1,20 +1,20 @@
 using System;
-using System.Text.RegularExpressions; // 1. ADICIONADO: Necessário para o Regex e GeneratedRegex
+using System.Text.RegularExpressions; // 1. ADDED: Required for Regex and GeneratedRegex
 
-namespace Jartisan.Application.Utils // Corrigido o erro de digitação de "Utills" para "Utils"
+namespace Jartisan.Application.Utils // Fixed typo from "Utills" to "Utils"
 {
-    public static partial class KebabRegex // 2. CORREÇÃO: Nome da classe alterado
+    public static partial class KebabRegex // 2. FIXED: Class name changed
     {
-        // O Source Generator vai criar a implementação desse método em tempo de build (AOT Safe)
+        // The Source Generator will create the implementation of this method at build time (AOT Safe)
         [GeneratedRegex("(?<!^)(?=[A-Z])")]
-        private static partial Regex GetKebabRegex(); // 3. CORREÇÃO: Nome do método alterado para não conflitar
+        private static partial Regex GetKebabRegex(); // 3. FIXED: Method name changed to avoid conflicts
 
-        // Método público para você chamar em outros lugares do código
+        // Public method for you to call from other parts of the code
         public static string Convert(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;
             
-            // Usa a Regex compilada para injetar o hífen e joga tudo para minúsculo
+            // Uses the compiled regex to inject the hyphen and converts everything to lowercase
             return GetKebabRegex().Replace(input, "-").ToLower();
         }
     }

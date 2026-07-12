@@ -14,7 +14,7 @@ namespace Jartisan.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
 
-            services.AddTransient<IProjectDetector, JavaProjectDetector>();
+            services.AddSingleton<IProjectDetector, JavaProjectDetector>();
             services.AddTransient<IProjectFactory, JavaProjectFactory>();
             services.AddTransient<IJsonManager, JsonManager>();
             services.AddTransient<IFolderScanner, FolderScanner>();

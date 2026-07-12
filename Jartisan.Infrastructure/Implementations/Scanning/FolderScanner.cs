@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Jartisan.Application.Ports;
 using Jartisan.Domain.Entities;
 
@@ -5,8 +9,7 @@ namespace Jartisan.Infrastructure.Implementations.Scanning;
 
 public class FolderScanner : IFolderScanner
 {
-    private readonly string _rootPath = Directory.GetCurrentDirectory();
-      private readonly IProjectDetector _projectDetector;
+    private readonly IProjectDetector _projectDetector;
     private static readonly Dictionary<string, string[]> _folderAliases = new()
     {
         // 1. ADICIONADO: Mapeamento para a pasta de Templates no root
@@ -21,23 +24,19 @@ public class FolderScanner : IFolderScanner
     
     public FolderScanner(IProjectDetector projectDetector)
     {
-        _projectDetector = projectDetector;
+        _projectDetector = projectDetector ?? throw new ArgumentNullException(nameof(projectDetector));
     }
 
 
     public FolderMap Scan()
     {
-        string pomPath = Path.Combine(_rootPath, "pom.xml");
-        bool isMavenProject = File.Exists(pomPath);
-        
-        var folderPaths = GetFolderPaths(_rootPath, _folderAliases);
+        var folderPaths = GetFolderPaths(_projectDetector.RootPath, _folderAliases);
 
-
-      string  baseJavaPath = this.getJavaPath();
-        // 4. Aplica o fallback paliativo matemático usando o operador ??
+        string baseJavaPath = this.getJavaPath();
+        // 4. Applies the palliative mathematical fallback using the ?? operator
         return new FolderMap(
-            RootPath: _rootPath,
-            TemplatesFolder: folderPaths.GetValueOrDefault("Templates")    ?? Path.Combine(_rootPath, "templates.jartisan"),
+            RootPath: _projectDetector.RootPath,
+            TemplatesFolder: folderPaths.GetValueOrDefault("Templates")    ?? Path.Combine(_projectDetector.RootPath, "templates.jartisan"),
             Controllers:     folderPaths.GetValueOrDefault("Controllers")  ?? Path.Combine(baseJavaPath, "Controller"),
             Models:          folderPaths.GetValueOrDefault("Models")       ?? Path.Combine(baseJavaPath, "Model"),
             Services:        folderPaths.GetValueOrDefault("Services")     ?? Path.Combine(baseJavaPath, "Service"),
@@ -78,7 +77,7 @@ public class FolderScanner : IFolderScanner
         
         // Transforma os pontos do pacote em barras do sistema operacional
         string packageFolder = groupId.Trim().Replace(".", "/");
-        string baseJavaPath = Path.Combine(_rootPath, "src", "main", "java", packageFolder);
+        string baseJavaPath = Path.Combine(_projectDetector.RootPath, "src", "main", "java", packageFolder);
         return baseJavaPath;
     }
 }

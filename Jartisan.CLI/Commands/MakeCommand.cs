@@ -8,14 +8,14 @@ namespace Jartisan.CLI.Commands
 {
     public class MakeCommand(MakeUseCase makeUseCase)
     { 
-        /// <summary>
-        /// Generates code scaffolding for a specific artifact type.
-        /// </summary>
-        /// <param name="scaffoldingType">The type of artifact to generate (e.g., controller, service, repository).</param>
-        /// <param name="inputName">The name of the class or component to be created.</param>
-        /// <param name="crud">-c, --crud, Automatically generates full CRUD operations for the artifact.</param>
-        /// <param name="force">-f, --force, Overwrites existing files if they already exist.</param>
-        [Command("make")] 
+       /// <summary>
+    /// [Make] Generates code scaffolding for a specific artifact type (e.g., controller, service).
+    /// </summary>
+    /// <param name="scaffoldingType">The type of artifact to generate (e.g., controller, service, repository).</param>
+    /// <param name="inputName">The name of the class or component to be created.</param>
+    /// <param name="crud">-c, --crud, Automatically generates full CRUD operations for the artifact.</param>
+    /// <param name="force">-f, --force, Overwrites existing files if they already exist.</param>
+     [Command("make|mk")]
         
         public void Execute(
             [Argument] string scaffoldingType, // Parâmetro posicional obrigatório

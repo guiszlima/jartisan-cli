@@ -9,19 +9,20 @@ namespace Jartisan.Infrastructure.Implementations.Maven
 {
     public class PomReader : IDependencyReader
     {
-        private readonly string _pomPath;
+        private readonly IProjectDetector _projectDetector;
 
-        public PomReader()
+        public PomReader(IProjectDetector projectDetector)
         {
-            _pomPath = Path.Combine(Directory.GetCurrentDirectory(), "pom.xml");
+            _projectDetector = projectDetector ?? throw new ArgumentNullException(nameof(projectDetector));
         }
 
         public List<string> ListDependencies()
         {
-            if (!File.Exists(_pomPath))
-                throw new FileNotFoundException("pom.xml file not found in the current directory.");
+            var pomPath = _projectDetector.PomPath;
+            if (!File.Exists(pomPath))
+                throw new FileNotFoundException($"pom.xml file not found at {pomPath}.");
 
-            var doc = XDocument.Load(_pomPath);
+            var doc = XDocument.Load(pomPath);
             XNamespace ns = doc.Root.Name.Namespace;
 
             // Retrieves all dependencies and maps them to a formatted string

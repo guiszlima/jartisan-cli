@@ -20,7 +20,7 @@ public record FolderMap(
         {
             if (string.IsNullOrWhiteSpace(folderName)) return null;
 
-            // Normaliza o input do usuário para minúsculo
+            // Normalizes user input to lowercase
             string search = folderName.Trim().ToLower();
 
             // 1. Tenta buscar primeiro nas propriedades nativas
@@ -34,7 +34,7 @@ public record FolderMap(
                 _            => null
             };
 
-            // 2. Se não for nativa, cai direto na busca do dicionário Custom
+            // 2. If it's not native, falls directly into the Custom dictionary search
             if (nativePath == null && Custom != null)
             {
                 Custom.TryGetValue(search, out nativePath);

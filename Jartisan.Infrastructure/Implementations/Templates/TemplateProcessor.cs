@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Jartisan.Application.Ports;
-using Jartisan.Application.Utils; // Importa a sua pasta Utills onde está a classe KebabRegex
+using Jartisan.Application.Utils; // Imports your Utils folder where the KebabRegex class is
 
 namespace Jartisan.Infrastructure.Implementations.Templates;
 

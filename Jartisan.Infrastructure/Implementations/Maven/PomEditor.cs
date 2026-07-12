@@ -9,29 +9,30 @@ namespace Jartisan.Infrastructure.Implementations.Maven
 {
     public class PomEditor : IDependencyEditor
     {
-        private readonly string _pomPath;
+        private readonly IProjectDetector _projectDetector;
 
-        public PomEditor()
+        public PomEditor(IProjectDetector projectDetector)
         {
-            _pomPath = Path.Combine(Directory.GetCurrentDirectory(), "pom.xml");
+            _projectDetector = projectDetector ?? throw new ArgumentNullException(nameof(projectDetector));
         }
 
         public bool AddDependency(DependencyInfo dependency)
         {
             if (dependency == null) throw new ArgumentNullException(nameof(dependency));
 
-            if (!File.Exists(_pomPath))
-                throw new FileNotFoundException("pom.xml was not found in the current directory.");
+            var pomPath = _projectDetector.PomPath;
+            if (!File.Exists(pomPath))
+                throw new FileNotFoundException($"pom.xml was not found at {pomPath}.");
 
-            // Mantém comentários e espaços em branco originais
-            var doc = XDocument.Load(_pomPath, LoadOptions.PreserveWhitespace);
+            // Keeps original comments and whitespace
+            var doc = XDocument.Load(pomPath, LoadOptions.PreserveWhitespace);
             
             var root = doc.Elements().FirstOrDefault(e => e.Name.LocalName == "project");
             if (root == null) throw new Exception("The <project> tag was not found in pom.xml.");
             
             XNamespace activeNs = root.Name.Namespace;
 
-            // Verificação de Idempotência
+            // Idempotency verification
             if (DependencyExists(doc, dependency)) return false;
 
             // 3. Garante o bloco <dependencies>
@@ -42,9 +43,9 @@ namespace Jartisan.Infrastructure.Implementations.Maven
                 root.Add(new XText("\n    "), dependencies, new XText("\n"));
             }
 
-            // --- Lógica de Formatação ---
-            // Tenta detectar a indentação do último elemento (se houver)
-            string indent = "    "; // Default de 4 espaços
+            // --- Formatting logic ---
+            // Attempts to detect the indentation of the last element (if any)
+            string indent = "    "; // Default of 4 spaces
             var lastChild = dependencies.Elements().LastOrDefault();
             
             // Adiciona quebra de linha antes do elemento
@@ -63,16 +64,16 @@ namespace Jartisan.Infrastructure.Implementations.Maven
 
             dependencies.Add(newDependency);
             
-            // Garante que o fechamento da tag dependencies também tenha nova linha
+            // Ensures that the closing dependencies tag also has a new line
             if (dependencies.LastNode is not XText)
             {
                 dependencies.Add(new XText("\n"));
             }
 
-            // 5. Escrita Atômica
-            string tempPath = _pomPath + ".tmp";
+            // 5. Atomic write
+            string tempPath = pomPath + ".tmp";
             doc.Save(tempPath);
-            File.Move(tempPath, _pomPath, overwrite: true);
+            File.Move(tempPath, pomPath, overwrite: true);
             return true;
         }
 

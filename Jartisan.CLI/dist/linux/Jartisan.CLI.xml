@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Jartisan.CLI</name>
+    </assembly>
+    <members>
+        <member name="M:Jartisan.CLI.Commands.AddCommand.HandleAsync(System.String)">
+            <summary>
+            Adds a dependency to the project's pom.xml file.
+            </summary>
+            <param name="query">The search query for finding the dependency.</param>
+        </member>
+        <member name="M:Jartisan.CLI.Commands.InitCommand.Execute">
+            <summary>
+            Initializes a new Maven project interactively or updates existing configurations.
+            </summary>
+        </member>
+        <member name="M:Jartisan.CLI.Commands.InitCommand.GetUserConfig">
+            <summary>
+            Asks the user for data via terminal. If empty, keeps the record's default.
+            </summary>
+        </member>
+        <member name="M:Jartisan.CLI.Commands.ListCommand.Execute">
+            <summary>
+            Lists all dependencies currently defined in the pom.xml file.
+            </summary>
+        </member>
+        <member name="M:Jartisan.CLI.Commands.MakeCommand.Execute(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            [Make] Generates code scaffolding for a specific artifact type (e.g., controller, service).
+            </summary>
+            <param name="scaffoldingType">The type of artifact to generate (e.g., controller, service, repository).</param>
+            <param name="inputName">The name of the class or component to be created.</param>
+            <param name="crud">-c, --crud, Automatically generates full CRUD operations for the artifact.</param>
+            <param name="force">-f, --force, Overwrites existing files if they already exist.</param>
+        </member>
+        <member name="M:Jartisan.CLI.Commands.ScanCommand.Execute">
+            <summary>
+            Scans the project directory structure and synchronizes it with the jartisan.json configuration.
+            </summary>
+        </member>
+        <member name="T:ConsoleAppFramework.ConsoleAppContext">
+            <summary>
+            Represents the execution context for a console application command, containing command metadata and parsed arguments.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.CommandName">
+            <summary>
+            Gets the name of the command being executed.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.Arguments">
+            <summary>
+            Gets the raw arguments passed to the application, including the command name itself.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.State">
+            <summary>
+            Gets the custom state object that can be used to share data across commands.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.GlobalOptions">
+            <summary>
+            Gets the parsed global options that apply across all commands.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.CommandDepth">
+            <summary>
+            Gets the depth of the command in a nested command hierarchy. Used internally by the framework.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.EscapeIndex">
+            <summary>
+            Gets the index of the escape separator ('--') in the arguments, or -1 if not present. Used internally by the framework.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.InternalCommandArgs">
+            <summary>
+            Gets the internal command arguments with global options removed. Used internally by the framework.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.CommandArguments">
+            <summary>
+            Gets the arguments intended for the current command, excluding the command name and any escaped arguments after '--'.
+            </summary>
+        </member>
+        <member name="P:ConsoleAppFramework.ConsoleAppContext.EscapedArguments">
+            <summary>
+            Gets the arguments that appear after the escape separator ('--'), which are not parsed by the command.
+            Returns an empty span if no escape separator is present.
+            </summary>
+        </member>
+        <member name="M:ConsoleAppFramework.ConsoleAppContext.ToString">
+            <summary>
+            Returns a string representation of all arguments joined by spaces.
+            </summary>
+            <returns>A space-separated string of all arguments.</returns>
+        </member>
+        <member name="M:ConsoleAppFramework.ConsoleApp.Run(System.String[],System.Delegate)">
+            <summary>
+            <para>You can pass second argument that generates new Run overload.</para>
+            ConsoleApp.Run(args, (int x, int y) => { });<br/>
+            ConsoleApp.Run(args, Foo);<br/>
+            ConsoleApp.Run(args, &amp;Foo);<br/>
+            </summary>
+        </member>
+        <member name="M:ConsoleAppFramework.ConsoleApp.RunAsync(System.String[],System.Delegate)">
+            <summary>
+            <para>You can pass second argument that generates new RunAsync overload.</para>
+            ConsoleApp.RunAsync(args, (int x, int y) => { });<br/>
+            ConsoleApp.RunAsync(args, Foo);<br/>
+            ConsoleApp.RunAsync(args, &amp;Foo);<br/>
+            </summary>
+        </member>
+        <member name="M:ConsoleAppFramework.ConsoleApp.ConsoleAppBuilder.ConfigureDefaultConfiguration">
+            <summary>Create configuration with SetBasePath(Directory.GetCurrentDirectory()) and AddJsonFile(appsettings.json).</summary>
+        </member>
+        <member name="M:ConsoleAppFramework.ConsoleApp.ConsoleAppBuilder.ConfigureDefaultConfiguration(System.Action{Microsoft.Extensions.Configuration.IConfigurationBuilder})">
+            <summary>Create configuration with SetBasePath(Directory.GetCurrentDirectory()) and AddJsonFile(appsettings.json).</summary>
+        </member>
+    </members>
+</doc>

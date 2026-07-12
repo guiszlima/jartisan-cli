@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Text.Json;
 using Jartisan.Application.Ports;
 using Jartisan.Domain.Entities;
@@ -8,7 +10,13 @@ namespace Jartisan.Infrastructure.Implementations.Configuration;
 public class JsonManager : IJsonManager
 
 {
-     private readonly string _rootPath = Directory.GetCurrentDirectory();
+    private readonly IProjectDetector _projectDetector;
+
+    public JsonManager(IProjectDetector projectDetector)
+    {
+        _projectDetector = projectDetector ?? throw new ArgumentNullException(nameof(projectDetector));
+    }
+
     public void SaveJsonConfig(FolderMap folderMap)
     {
         if (folderMap == null) 
@@ -20,17 +28,22 @@ public class JsonManager : IJsonManager
         File.WriteAllText(filePath, jsonString);
     }
 
-    public FolderMap LoadConfig()
+   public FolderMap LoadConfig()
+{
+    string filePath = Path.Combine(_projectDetector.RootPath, "jartisan.json");
+    
+    // Checks if jartisan.json exists, throwing a clean operation exception for bad DevEx directory contexts
+    if (!File.Exists(filePath))
     {
-        string filePath = Path.Combine(_rootPath, "jartisan.json");
-        
-        if (!File.Exists(filePath))
-            throw new FileNotFoundException($"The configuration file was not found at {filePath}");
-
-        string jsonString = File.ReadAllText(filePath);
-        
-        var config = JsonSerializer.Deserialize<FolderMap>(jsonString, JartisanJsonContext.Default.FolderMap);
-        
-        return config ?? throw new InvalidOperationException("Failed to deserialize the jartisan.json file");
+        throw new InvalidOperationException(
+            "You are not inside an initialized Jartisan project or you are in the wrong directory. " +
+            "Make sure to execute this command within a project directory that contains a 'jartisan.json' file.");
     }
+
+    string jsonString = File.ReadAllText(filePath);
+    
+    var config = JsonSerializer.Deserialize<FolderMap>(jsonString, JartisanJsonContext.Default.FolderMap);
+    
+    return config ?? throw new InvalidOperationException("Failed to deserialize the jartisan.json file.");
+}
 }

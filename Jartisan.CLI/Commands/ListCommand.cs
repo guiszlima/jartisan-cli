@@ -15,7 +15,7 @@ namespace Jartisan.CLI.Commands
             _useCase = useCase;
         }
 
-        // ORDEM CORRETA: Bloco XML primeiro, seguido do atributo colado na assinatura do método
+        // CORRECT ORDER: XML block first, followed by attribute attached to method signature
         /// <summary>
         /// Lists all dependencies currently defined in the pom.xml file.
         /// </summary>

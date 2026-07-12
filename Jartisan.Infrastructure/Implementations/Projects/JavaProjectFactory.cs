@@ -1,29 +1,30 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Jartisan.Domain.Entities;
 using Jartisan.Application.Ports;
 
 namespace Jartisan.Infrastructure.Implementations.Projects;
-    // 1. Objeto de configuração com valores padrão (opcionais)
+    // 1. Configuration object with default values (optional)
    
     public class JavaProjectFactory : IProjectFactory
     {
-        private readonly string _rootPath;
-        private readonly DirectoryInfo _dirInfo;
+        private readonly IProjectDetector _projectDetector;
        
-      public JavaProjectFactory()
+        public JavaProjectFactory(IProjectDetector projectDetector)
         {
-            // Agora o contexto é de instância, e _rootPath já existe
-            _rootPath = Directory.GetCurrentDirectory();
-            _dirInfo = new DirectoryInfo(_rootPath);
+            _projectDetector = projectDetector ?? throw new ArgumentNullException(nameof(projectDetector));
         }
+
         public void CreateProject(JavaProjectConfig? config = null)
         {
-
             config ??= new JavaProjectConfig();
-            Console.WriteLine($"Criando projeto Maven com GroupId: {config.GroupId}, ArtifactId: {config.ArtifactId ?? _dirInfo.Name}, Version: {config.Version}, {_rootPath}");
-            // Se o usuário não digitou nada, assume a pasta, senão, mantém o que o usuário digitou
-            config.ArtifactId ??= this._dirInfo.Name; 
+            var projectName = new DirectoryInfo(_projectDetector.RootPath).Name;
+            Console.WriteLine($"Creating Maven project with GroupId: {config.GroupId}, ArtifactId: {config.ArtifactId ?? projectName}, Version: {config.Version}, {_projectDetector.RootPath}");
+            // If the user didn't type anything, assume the folder, otherwise keep what the user typed
+            config.ArtifactId ??= projectName; 
 
-            // MUDANÇA: Use config.ArtifactId aqui, e não this._dirInfo.Name
+            // CHANGE: Use config.ArtifactId here, not project folder name
             CreateJavaDirectoryStructure(config.GroupId);
             CreatePomXmlFile(config.GroupId, config.ArtifactId, config.Version);
         }
@@ -32,13 +33,13 @@ namespace Jartisan.Infrastructure.Implementations.Projects;
 private void CreateJavaDirectoryStructure(string groupId)
     {
         string[] packageFolders = groupId.Split('.');
-        var pathParts = new List<string> { _rootPath, "src", "main", "java" };
+        var pathParts = new List<string> { _projectDetector.RootPath, "src", "main", "java" };
         pathParts.AddRange(packageFolders);
 
         string fullJavaPath = Path.Combine(pathParts.ToArray());
         Directory.CreateDirectory(fullJavaPath);
 
-        string resourcesPath = Path.Combine(_rootPath, "src", "main", "resources");
+        string resourcesPath = Path.Combine(_projectDetector.RootPath, "src", "main", "resources");
         Directory.CreateDirectory(resourcesPath);
     }
 
@@ -46,7 +47,7 @@ private void CreateJavaDirectoryStructure(string groupId)
        
  private void CreatePomXmlFile(string groupId, string artifactId, string version)
         {
-            string pomPath = Path.Combine(_rootPath, "pom.xml");
+            var pomPath = _projectDetector.PomPath;
             
             if (!File.Exists(pomPath))
             {

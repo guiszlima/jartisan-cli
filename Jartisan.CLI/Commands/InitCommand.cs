@@ -22,30 +22,30 @@ namespace Jartisan.CLI.Commands
         {
             try
             {
-                // 1. Cenário: O projeto já existe
+                // 1. Scenario: The project already exists
                 if (detectUseCase.Execute())
                 {
                     Console.WriteLine("The current project is already a Maven project. Do you want to update the jartisan.json file? (y/n)");
                     if (Console.ReadLine()?.Trim().ToLower() == "y")
                     {
-                        // Passo A: Atualiza as configurações e captura o FolderMap do scanner
+                        // Step A: Updates configurations and captures FolderMap from scanner
                         FolderMap map = jsonUseCase.Execute();
                         
-                        // Passo B: Garante a criação da pasta apenas se ela não existir no HD
+                        // Step B: Ensures folder creation only if it doesn't exist on disk
                         templatesUseCase.Execute(map.TemplatesFolder);
                         
                         Console.WriteLine("jartisan.json updated successfully.");
                     }
-                    return; // 🛑 Encerra a execução do comando aqui!
+                    return; // 🛑 Ends command execution here!
                 }
 
-                // 2. Cenário: O projeto não existe (Criação do zero)
+                // 2. Scenario: The project does not exist (Creation from scratch)
                 Console.Error.WriteLine("The current project is not a Maven project. Would you like to create a Maven project? (y/n)");
                 
                 if (Console.ReadLine()?.Trim().ToLower() != "y")
                 {
                     Console.WriteLine("Operation cancelled by the user.");
-                    return; // 🛑 Encerra a execução
+                    return; // 🛑 Ends execution
                 }
 
                 var config = GetUserConfig();
@@ -56,7 +56,7 @@ namespace Jartisan.CLI.Commands
                 // Passo A: Gera e salva o arquivo jartisan.json inicial
                 FolderMap novoMap = jsonUseCase.Execute();
                 
-                // Passo B: Cria a pasta de customização templates.jartisan com o README
+                // Step B: Creates the customization folder templates.jartisan with README
                 templatesUseCase.Execute(novoMap.TemplatesFolder);
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace Jartisan.CLI.Commands
         }
 
         /// <summary>
-        /// Pergunta os dados ao usuário pelo terminal. Se forem vazios, mantém o padrão do record.
+        /// Asks the user for data via terminal. If empty, keeps the record's default.
         /// </summary>
         private JavaProjectConfig GetUserConfig()
         {

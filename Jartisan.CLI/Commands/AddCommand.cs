@@ -19,12 +19,11 @@ namespace Jartisan.CLI.Commands
             _addUseCase = addUseCase ?? throw new ArgumentNullException(nameof(addUseCase));
         }
  
-      /// <summary>
+        /// <summary>
         /// Adds a dependency to the project's pom.xml file.
         /// </summary>
         /// <param name="query">The search query for finding the dependency.</param>
         [Command("add")] 
-       
         public async Task HandleAsync([Argument] string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -47,50 +46,65 @@ namespace Jartisan.CLI.Commands
                 return;
             }
 
-            // 3. Display the interactive list
-            Console.WriteLine($"\nFound {results.Count} results:\n");
-            for (int i = 0; i < results.Count; i++)
+            // Control variable to store the selected dependency
+            DependencyInfo selected;
+
+            // NEW DEVEX LOGIC: If there is only 1 result, select it automatically
+            if (results.Count == 1)
             {
-                var dep = results[i];
-                Console.WriteLine($" [{i + 1}] {dep.GroupId}:{dep.ArtifactId} (v{dep.Version})");
+                selected = results[0];
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"\n[Info] Single match found! Selecting automatically...");
+                Console.ResetColor();
             }
-
-            // 4. Seleção do usuário
-            int selectedIndex = -1;
-            while (true)
+            else
             {
-                Console.Write("\nChoose the dependency number (or 0 to cancel): ");
-                var input = Console.ReadLine();
-
-                if (int.TryParse(input, out int choice))
+                // 3. Display the interactive list (Apenas se houver mais de 1 resultado)
+                Console.WriteLine($"\nFound {results.Count} results:\n");
+                for (int i = 0; i < results.Count; i++)
                 {
-                    if (choice == 0) 
-                    {
-                        Console.WriteLine("Operation cancelled by the user.");
-                        return;
-                    }
-                    if (choice > 0 && choice <= results.Count)
-                    {
-                        selectedIndex = choice - 1;
-                        break;
-                    }
+                    var dep = results[i];
+                    Console.WriteLine($" [{i + 1}] {dep.GroupId}:{dep.ArtifactId} (v{dep.Version})");
                 }
-                Console.WriteLine("Invalid option, please try again.");
+
+                // 4. User selection
+                int selectedIndex = -1;
+                while (true)
+                {
+                    Console.Write("\nChoose the dependency number (or 0 to cancel): ");
+                    var input = Console.ReadLine();
+
+                    if (int.TryParse(input, out int choice))
+                    {
+                        if (choice == 0) 
+                        {
+                            Console.WriteLine("Operation cancelled by the user.");
+                            return;
+                        }
+                        if (choice > 0 && choice <= results.Count)
+                        {
+                            selectedIndex = choice - 1;
+                            break;
+                        }
+                    }
+                    Console.WriteLine("Invalid option, please try again.");
+                }
+
+                selected = results[selectedIndex];
             }
 
-            // 5. Execução da adição
-            var selected = results[selectedIndex];
+            // 5. Execution of addition
             try
             {
                 bool isAdded = _addUseCase.AddDependency(selected);
     
-    Console.ForegroundColor = isAdded ? ConsoleColor.Green : ConsoleColor.Yellow;
-    
-    Console.WriteLine(isAdded 
-        ? $"\n[Success] Added: {selected.GroupId}:{selected.ArtifactId} (v{selected.Version}) ✨" 
-        : $"\n[Warning] The dependency {selected.GroupId}:{selected.ArtifactId} already exists in pom.xml.");
-        
-    Console.ResetColor();
+                Console.ForegroundColor = isAdded ? ConsoleColor.Green : ConsoleColor.Yellow;
+                
+                Console.WriteLine(isAdded 
+                    ? $"\n[Success] Added: {selected.GroupId}:{selected.ArtifactId} (v{selected.Version}) ✨" 
+                    : $"\n[Warning] The dependency {selected.GroupId}:{selected.ArtifactId} already exists in pom.xml.");
+                    
+                Console.ResetColor();
             }
             catch (Exception ex)
             {

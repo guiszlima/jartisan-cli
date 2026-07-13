@@ -68,37 +68,16 @@ namespace Jartisan.CLI.Commands
                 Console.WriteLine($"\n[Info] Single match found! Selecting automatically...");
                 Console.ResetColor();
             }
-            else
+ else
             {
-                // 3. Display the interactive list (Apenas se houver mais de 1 resultado)
-                Console.WriteLine($"\nFound {results.Count} results:\n");
-                for (int i = 0; i < results.Count; i++)
+                // Local Pagination Settings
+                int selectedIndex = ShowPaginatedMenu(results);
+                
+                // Se o retorno for -1, significa que o usuário escolheu cancelar (0)
+                if (selectedIndex == -1)
                 {
-                    var dep = results[i];
-                    Console.WriteLine($" [{i + 1}] {dep.GroupId}:{dep.ArtifactId} (v{dep.Version})");
-                }
-
-                // 4. User selection
-                int selectedIndex = -1;
-                while (true)
-                {
-                    Console.Write("\nChoose the dependency number (or 0 to cancel): ");
-                    var input = Console.ReadLine();
-
-                    if (int.TryParse(input, out int choice))
-                    {
-                        if (choice == 0) 
-                        {
-                            Console.WriteLine("Operation cancelled by the user.");
-                            return;
-                        }
-                        if (choice > 0 && choice <= results.Count)
-                        {
-                            selectedIndex = choice - 1;
-                            break;
-                        }
-                    }
-                    Console.WriteLine("Invalid option, please try again.");
+                    Console.WriteLine("Operation cancelled by the user.");
+                    return;
                 }
 
                 selected = results[selectedIndex];
@@ -122,6 +101,126 @@ namespace Jartisan.CLI.Commands
                 DisplayError($"Error updating pom.xml: {ex.Message}");
             }
         }
+
+  
+ private static int ShowPaginatedMenu(List<DependencyInfo> results)
+{
+    int pageSize = 10;
+    int currentPage = 1;
+    int totalItems = results.Count;
+    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+    int linesWritten = 0;
+
+    while (true)
+    {
+        // Reseta o cursor e limpa o bloco anterior cirurgicamente via ANSI
+        if (linesWritten > 0)
+        {
+            Console.Write($"\u001b[{linesWritten}A\u001b[J");
+        }
+
+        int currentLinesCount = 0;
+
+        // --- TÍTULO ---
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine($"\n--- Search Results (Page {currentPage} of {totalPages}) ---");
+        Console.ResetColor();
+        currentLinesCount += 2;
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Math.Min(startIndex + pageSize, totalItems);
+
+        // --- LISTAGEM DE DEPENDÊNCIAS ---
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            var dep = results[i];
+            
+            // Cor do Número da Opção [X]
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($" [{i + 1}] ");
+            
+            // Cor do GroupId e ArtifactId
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write($"{dep.GroupId}:{dep.ArtifactId}");
+            
+            // Cor da Versão
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($" (v{dep.Version})");
+            
+            Console.ResetColor();
+            currentLinesCount++;
+        }
+
+        // --- OPÇÕES DE NAVEGAÇÃO ---
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        Console.WriteLine("\nNavigation Options:");
+        Console.ResetColor();
+        currentLinesCount += 2;
+        
+        if (currentPage < totalPages) 
+        { 
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("  [N] Next Page"); 
+            Console.ResetColor();
+            currentLinesCount++; 
+        }
+        if (currentPage > 1)          
+        { 
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("  [P] Previous Page"); 
+            Console.ResetColor();
+            currentLinesCount++; 
+        }
+        
+        // Opção Cancelar em Vermelho
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("  [0] Cancel Process");
+        Console.ResetColor();
+        currentLinesCount++;
+
+        // Prompt de Input
+        Console.Write("\nChoose a dependency number or navigation command: ");
+        currentLinesCount += 2; 
+
+        linesWritten = currentLinesCount;
+
+        var input = Console.ReadLine()?.Trim().ToUpper();
+
+        if (input == "N" && currentPage < totalPages)
+        {
+            currentPage++;
+            continue;
+        }
+        if (input == "P" && currentPage > 1)
+        {
+            currentPage--;
+            continue;
+        }
+
+        if (int.TryParse(input, out int choice))
+        {
+            if (choice == 0) 
+            {
+                return -1; // Cancelado
+            }
+            if (choice > 0 && choice <= totalItems)
+            {
+                return choice - 1; // Retorna o índice correto
+            }
+        }
+
+        // Feedback de erro temporário
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        Console.WriteLine("Invalid option, please try again.");
+        Console.ResetColor();
+        linesWritten++; 
+        
+        Thread.Sleep(800);
+    }
+}
+
+
 
         private static async Task<T?> ShowLoadingAnimationAsync<T>(Task<T?> task)
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -19,7 +20,24 @@ namespace Jartisan.Infrastructure.Implementations.Maven
             DefaultRequestHeaders = { { "User-Agent", "Jartisan-CLI/1.0" } }
         };
 
-        
+        // --- ATRIBUTO EXTERNO: Provedores Oficiais de Mercado ---
+        private static readonly HashSet<string> OfficialOrgPrefixes = new()
+        {
+            "org.springframework",
+            "org.projectlombok",
+            "com.fasterxml.jackson",
+            "com.google.guava",
+            "com.google.code.gson",
+            "org.junit",
+            "org.hibernate",
+            "org.apache.commons",
+            "org.mockito",
+            "org.slf4j",
+            "ch.qos.logback",
+            "org.postgresql",
+            "com.mysql"
+        };
+
         private record QueryParameters(string? GroupId, string? ArtifactId, string? Version, string? SearchText)
         {
             public bool IsExactMatch => !string.IsNullOrEmpty(GroupId) && !string.IsNullOrEmpty(ArtifactId);
@@ -32,39 +50,34 @@ namespace Jartisan.Infrastructure.Implementations.Maven
 
             if (string.IsNullOrWhiteSpace(query)) return results;
 
-            // Transforms user input into structured parameters
             var parsed = ParseQuery(query);
             string solrQuery;
 
             if (parsed.IsExactMatch)
             {
-                // g:"group" AND a:"artifact" (with or without version)
                 solrQuery = parsed.HasVersion 
                     ? $"g:\"{parsed.GroupId}\" AND a:\"{parsed.ArtifactId}\" AND v:\"{parsed.Version}\""
                     : $"g:\"{parsed.GroupId}\" AND a:\"{parsed.ArtifactId}\"";
             }
             else if (!string.IsNullOrEmpty(parsed.SearchText) && parsed.HasVersion)
             {
-                // If user typed free text + version (Ex: jackson : 2.15.2)
-                // Broad search for the term, but strictly ties to the typed version
-              solrQuery = $"a:\"{parsed.SearchText!}\" AND v:\"{parsed.Version}\"";
+                solrQuery = $"a:\"{parsed.SearchText!}\" AND v:\"{parsed.Version}\"";
             }
             else
             {
-                // Only pure free text (your previous versatile solution)
                 solrQuery = $"{parsed.SearchText!} OR a:{parsed.SearchText!}^2";
             }
+            
             var sanitizedQuery = Uri.EscapeDataString(solrQuery);
-            var url = $"https://search.maven.org/solrsearch/select?q={sanitizedQuery}&rows=10&wt=json";
+            var url = $"https://search.maven.org/solrsearch/select?q={sanitizedQuery}&rows=100&wt=json";
 
             try
             {
                 using var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsStringAsync(cancellationToken);
-                
-                using var doc = JsonDocument.Parse(json);
+                var json = await response.Content.ReadAsStreamAsync(cancellationToken);
+                using var doc = await JsonDocument.ParseAsync(json, cancellationToken: cancellationToken);
                 
                 if (!doc.RootElement.TryGetProperty("response", out var responseProp) ||
                     !responseProp.TryGetProperty("docs", out var docsProp))
@@ -76,8 +89,8 @@ namespace Jartisan.Infrastructure.Implementations.Maven
                 {
                     var groupId = item.TryGetProperty("g", out var g) ? g.GetString() : null;
                     var artifactId = item.TryGetProperty("a", out var a) ? a.GetString() : null;
-                    
                     string version = "unknown";
+
                     if (item.TryGetProperty("v", out var v))
                     {
                         version = v.GetString() ?? "unknown";
@@ -93,28 +106,48 @@ namespace Jartisan.Infrastructure.Implementations.Maven
                     }
                 }
 
-                return results;
+       
+                var queryTerm = parsed.SearchText?.ToLower() ?? "";
+                
+                var sortedResults = results
+                    .OrderByDescending(dep => {
+                        var groupIdLower = dep.GroupId.ToLower();
+
+                        // Verifica usando Any() contra o HashSet externo
+                        bool isOfficialOrg = OfficialOrgPrefixes.Any(prefix => groupIdLower.StartsWith(prefix));
+                        
+                        if (isOfficialOrg) return 4;
+
+                        if (groupIdLower.Contains("project" + queryTerm)) return 3;
+                        if (groupIdLower.EndsWith("." + queryTerm) || groupIdLower == queryTerm) return 2;
+                        if (dep.ArtifactId.ToLower() == queryTerm) return 1;
+                        
+                        return 0;
+                    })
+                    .ThenBy(dep => dep.GroupId.Length)
+                    .ToList();
+
+                return sortedResults;
             }
             catch (Exception ex)
-            {   
+            {
                 Console.WriteLine($"Erro ao buscar no Maven: {ex.Message}");
-                return results; 
+                return results;
             }
         }
 
+       
         private static QueryParameters ParseQuery(string query)
-{
+        {
             if (string.IsNullOrWhiteSpace(query))
                 return new QueryParameters(null, null, null, null);
 
-          
             var tokens = query.Split(':', StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < tokens.Length; i++)
             {
                 tokens[i] = tokens[i].Trim();
             }
 
-            // If it's GroupId ArtifactId and the version (optional)
             if (tokens.Length >= 2 && tokens[0].Contains('.'))
             {
                 var groupId = tokens[0];
@@ -124,7 +157,6 @@ namespace Jartisan.Infrastructure.Implementations.Maven
                 return new QueryParameters(groupId, artifactId, version, null);
             }
 
-            // If it's Free Text + Version
             if (tokens.Length == 2)
             {
                 var searchText = tokens[0];
@@ -133,9 +165,7 @@ namespace Jartisan.Infrastructure.Implementations.Maven
                 return new QueryParameters(null, null, version, searchText);
             }
 
-            // Se for Apenas Texto Livre puro 
             return new QueryParameters(null, null, null, query.Trim());
         }
-
     }
 }

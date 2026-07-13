@@ -55,7 +55,7 @@ jartisan make controller UserController --crud
 ```
 
 ### `scan`
-Scans the project directory structure to build a folder map.
+Scans the project directory structure to update the folder map in the file jartisan.json.
 
 ```bash
 jartisan scan

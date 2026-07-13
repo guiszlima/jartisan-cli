@@ -19,26 +19,7 @@ namespace Jartisan.Infrastructure.Implementations.Maven
         {
             DefaultRequestHeaders = { { "User-Agent", "Jartisan-CLI/1.0" } }
         };
-
-        // --- ATRIBUTO EXTERNO: Provedores Oficiais de Mercado ---
-        private static readonly HashSet<string> OfficialOrgPrefixes = new()
-        {
-            "org.springframework",
-            "org.projectlombok",
-            "com.fasterxml.jackson",
-            "com.google.guava",
-            "com.google.code.gson",
-            "org.junit",
-            "org.hibernate",
-            "org.apache.commons",
-            "org.mockito",
-            "org.slf4j",
-            "ch.qos.logback",
-            "org.postgresql",
-            "com.mysql"
-        };
-
-        private record QueryParameters(string? GroupId, string? ArtifactId, string? Version, string? SearchText)
+       private record QueryParameters(string? GroupId, string? ArtifactId, string? Version, string? SearchText)
         {
             public bool IsExactMatch => !string.IsNullOrEmpty(GroupId) && !string.IsNullOrEmpty(ArtifactId);
             public bool HasVersion => !string.IsNullOrEmpty(Version);
@@ -112,9 +93,9 @@ namespace Jartisan.Infrastructure.Implementations.Maven
                 var sortedResults = results
                     .OrderByDescending(dep => {
                         var groupIdLower = dep.GroupId.ToLower();
-
+                            
                         // Verifica usando Any() contra o HashSet externo
-                        bool isOfficialOrg = OfficialOrgPrefixes.Any(prefix => groupIdLower.StartsWith(prefix));
+                              bool isOfficialOrg = MavenOrgRegistry.OfficialOrgPrefixes.Any(prefix => groupIdLower.StartsWith(prefix));
                         
                         if (isOfficialOrg) return 4;
 

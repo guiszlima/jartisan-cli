@@ -4,7 +4,7 @@
 ![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-Jartisan is a .NET-based command-line tool designed to streamline the management of Java/Maven projects. It provides automated project detection, `pom.xml` dependency editing, intelligent scaffolding generation, and directory scanning—all built on a robust Clean Architecture approach.
+Jartisan is a standalone, fast command-line tool compiled with .NET Native AOT to streamline the management of Java/Maven projects. It offers zero-dependency execution, automated project detection, `pom.xml` dependency editing, intelligent scaffolding generation, and directory scanning—all built on Clean Architecture.
 
 ## ✨ Key Features
 
